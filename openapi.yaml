@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: Mood Diary API
+  version: 1.0.0
+  description: OpenAPI documentation for Mood Diary API.
+
+servers:
+  - url: /api
+    description: API base URL
+
+tags:
+  - name: Moods
+  - name: MoodEntries
+
+paths:
+  /v1/moods:
+    get:
+      tags: [Moods]
+      summary: Get available moods
+      responses:
+        '200':
+          description: Allowed mood values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+                      enum: [rad, good, meh, sad, awful]
+
+  /v1/mood-entries:
+    get:
+      tags: [MoodEntries]
+      summary: List current user mood entries
+      parameters:
+        - $ref: '#/components/parameters/XUserIdHeader'
+        - in: query
+          name: date_from
+          schema:
+            type: string
+            format: date
+          description: Filter start date (YYYY-MM-DD)
+        - in: query
+          name: date_to
+          schema:
+            type: string
+            format: date
+          description: Filter end date (YYYY-MM-DD)
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 15
+      responses:
+        '200':
+          description: Paginated mood entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMoodEntries'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    post:
+      tags: [MoodEntries]
+      summary: Create mood entry
+      parameters:
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mood]
+              properties:
+                mood:
+                  type: string
+                  enum: [rad, good, meh, sad, awful]
+                note:
+                  type: string
+                  maxLength: 255
+                  nullable: true
+                logged_at:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Mood entry created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MoodEntry'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+components:
+  parameters:
+    XUserIdHeader:
+      in: header
+      name: X-User-Id
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      description: Authenticated user id passed by upstream auth.
+
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+
+  schemas:
+    MoodEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        mood:
+          type: string
+          enum: [rad, good, meh, sad, awful]
+        note:
+          type: string
+          nullable: true
+        logged_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, user_id, mood, logged_at, created_at, updated_at]
+
+    PaginatedMoodEntries:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MoodEntry'
+        links:
+          type: object
+          additionalProperties: true
+        meta:
+          type: object
+          additionalProperties: true
