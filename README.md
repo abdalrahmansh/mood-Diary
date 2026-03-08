@@ -69,3 +69,10 @@ docker compose exec app php artisan migrate
 Swagger UI is available at:
 
 - [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
+
+## Landing Page
+
+The base route provides a simple landing page with quick links and endpoint references:
+
+- [http://localhost:8000/](http://localhost:8000/)
+- API docs link from the landing page: [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
