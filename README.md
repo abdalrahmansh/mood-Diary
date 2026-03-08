@@ -29,6 +29,17 @@ cd mood-diary-api
 cp .env.example .env
 ```
 
+Ensure the database settings match Docker defaults:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=db
+DB_PORT=5432
+DB_DATABASE=mood_diary
+DB_USERNAME=postgres
+DB_PASSWORD=secret
+```
+
 ### 4) Build and start containers
 
 ```bash
@@ -53,10 +64,8 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate
 ```
 
-
 ## API Documentation
 
 Swagger UI is available at:
 
 - [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
-
